@@ -26,11 +26,11 @@ export interface AvailableSlot {
  */
 export async function getAvailableSlots(
   prisma: PrismaClient,
-  dateStr: string,      // "YYYY-MM-DD" in the parent's timezone
+  localDayStr: string,      // "YYYY-MM-DD" in the parent's timezone
   parentTimezone: string,
 ): Promise<AvailableSlot[]> {
   // Determine UTC range for the parent's local date
-  const localDayStart = DateTime.fromISO(dateStr, { zone: parentTimezone }).startOf('day');
+  const localDayStart = DateTime.fromISO(localDayStr, { zone: parentTimezone }).startOf('day');
   const localDayEnd = localDayStart.endOf('day');
   const utcStart = localDayStart.toUTC();
   const utcEnd = localDayEnd.toUTC();
@@ -40,7 +40,8 @@ export async function getAvailableSlots(
   istDates.add(istDateOf(utcStart));
   istDates.add(istDateOf(utcEnd));
   // For cross-midnight shifts: also the previous IST day (a slot starting IST-yesterday may fall in today UTC)
-  istDates.add(istDateOf(utcStart.minus({ hours: 6 })));
+  const diff = 5 * 60 + 30 + CLASS_DURATION_MINUTES // UTC and Asia/Kolkata TZ diff and class duration
+  istDates.add(istDateOf(utcStart.minus({ minutes:  diff})));
 
   // Load all mentors with their schedules
   const mentors = await prisma.mentor.findMany({ include: { schedules: true } });
@@ -75,7 +76,7 @@ export async function getAvailableSlots(
           // Must fall within the parent's local date
           const slotLocalStart = toZone(slot.startUtc, parentTimezone);
           const slotLocalDateStr = slotLocalStart.toISODate();
-          if (slotLocalDateStr !== dateStr) continue;
+          if (slotLocalDateStr !== localDayStr) continue;
 
           // Capacity check: use the slot's own IST date (not the schedule's IST date).
           // Cross-midnight slots (e.g. 00:00 IST Nov 15 on a Nov 14 schedule) count against Nov 15.
