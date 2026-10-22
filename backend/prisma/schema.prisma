@@ -1,0 +1,41 @@
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Mentor {
+  id        Int        @id @default(autoincrement())
+  name      String
+  email     String     @unique
+  schedules Schedule[]
+  bookings  Booking[]
+}
+
+model Schedule {
+  id         Int    @id @default(autoincrement())
+  mentorId   Int
+  mentor     Mentor @relation(fields: [mentorId], references: [id])
+  dayOfWeek  Int    // 1=Monday … 6=Saturday (IST calendar day)
+  startTime  String // "HH:MM" IST wall-clock, e.g. "19:00"
+  endTime    String // "HH:MM" IST wall-clock; if endTime < startTime, shift crosses IST midnight
+}
+
+model Booking {
+  id             String   @id @default(cuid())
+  mentorId       Int
+  mentor         Mentor   @relation(fields: [mentorId], references: [id])
+  parentName     String
+  parentEmail    String
+  parentTimezone String   // IANA timezone identifier, e.g. "America/New_York"
+  startTime      DateTime // UTC instant
+  endTime        DateTime // UTC instant (startTime + 30 min)
+  classLink      String
+  status         String   @default("CONFIRMED")
+  createdAt      DateTime @default(now())
+
+  @@unique([mentorId, startTime])
+}
