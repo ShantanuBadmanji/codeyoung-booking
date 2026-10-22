@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { api, AvailableSlot, BookingError } from '../api/client';
@@ -93,7 +93,7 @@ export default function BookingPage() {
   return (
     <>
       <div className="step-indicator">
-        <div className={`step ${step === 'select-slot' ? 'active' : step !== 'select-slot' ? 'done' : ''}`} />
+        <div className={`step ${step === 'select-slot' ? 'active' : 'done'}`} />
         <div className={`step ${step === 'enter-details' || step === 'submitting' ? 'active' : ''}`} />
       </div>
 

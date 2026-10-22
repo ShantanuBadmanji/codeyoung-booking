@@ -3,6 +3,7 @@ import cors from 'cors';
 import { PrismaClient } from '@prisma/client';
 import { availabilityRouter } from './routes/availability';
 import { bookingsRouter } from './routes/bookings';
+import { mentorsRouter } from './routes/mentors';
 
 export function createApp(prisma: PrismaClient) {
   const app = express();
@@ -16,6 +17,7 @@ export function createApp(prisma: PrismaClient) {
 
   app.use('/api/availability', availabilityRouter(prisma));
   app.use('/api/bookings', bookingsRouter(prisma));
+  app.use('/api/mentors', mentorsRouter(prisma));
 
   return app;
 }

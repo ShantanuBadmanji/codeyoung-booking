@@ -56,6 +56,26 @@ async function post<T>(path: string, body: unknown): Promise<{ ok: boolean; stat
   return { ok: res.ok, status: res.status, data: data as T };
 }
 
+export interface MentorSummary {
+  id: number;
+  name: string;
+}
+
+export interface MentorSlot {
+  bookingId: string;
+  classLink: string;
+  parentName: string;
+  startDisplay: string;
+  endDisplay: string;
+  date: string;
+  startUtc: string;
+}
+
+export interface MentorScheduleResponse {
+  mentor: MentorSummary;
+  slots: MentorSlot[];
+}
+
 export const api = {
   getAvailability: (date: string, timezone: string) =>
     get<AvailabilityResponse>('/availability', { date, timezone }),
@@ -65,4 +85,10 @@ export const api = {
 
   getBooking: (id: string) =>
     get<BookingResult>(`/bookings/${id}`, {}),
+
+  getMentors: () =>
+    get<{ mentors: MentorSummary[] }>('/mentors', {}),
+
+  getMentorSchedule: (id: number) =>
+    get<MentorScheduleResponse>(`/mentors/${id}/bookings`, {}),
 };
